@@ -28,7 +28,7 @@ if (!isset($_SESSION["mikhmon"])) {
   if (isset($_POST['save']) && isset($_POST['csrf']) && !empty($_SESSION['csrf']) && hash_equals($_SESSION['csrf'], $_POST['csrf'])) {
 
     $suseradm = ($_POST['useradm']);
-    $spassadm = encrypt($_POST['passadm']);
+    $spassadm = password_hash($_POST['passadm'], PASSWORD_DEFAULT);
     $logobt = ($_POST['logobt']);
     $qrbt = ($_POST['qrbt']);
 

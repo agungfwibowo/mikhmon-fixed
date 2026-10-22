@@ -91,7 +91,16 @@ if ($id == "login" || substr($url, -1) == "p") {
     } else {
       $user = $_POST['user'];
       $pass = $_POST['pass'];
-      if ($user == $useradm && $pass == decrypt($passadm)) {
+      // verify password: new format = password_hash ($2y$...), legacy = reversible encrypt()
+      $islegacy = (substr($passadm, 0, 4) !== '$2y$');
+      $ok = $islegacy ? ($pass === decrypt($passadm)) : password_verify($pass, $passadm);
+      if ($user == $useradm && $ok) {
+        // one-time upgrade of a legacy (reversible) admin password to a one-way hash
+        if ($islegacy) {
+          $newhash = password_hash($pass, PASSWORD_DEFAULT);
+          $cfg = file_get_contents('./include/config.php');
+          file_put_contents('./include/config.php', str_replace('mikhmon>|>' . $passadm, 'mikhmon>|>' . $newhash, $cfg));
+        }
         session_regenerate_id(true);
         $_SESSION["mikhmon"] = $user;
         $_SESSION['fail'] = 0;
