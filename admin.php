@@ -165,8 +165,10 @@ if ($id == "login" || substr($url, -1) == "p") {
 } elseif ($id == "remove-logo" && $logo != ""  && !empty($session)) {
   include_once('./include/menu.php');
   $logopath = "./img/";
-  $remlogo = $logopath . $logo;
-  unlink("$remlogo");
+  $remlogo = $logopath . basename($logo);
+  if (is_file($remlogo)) {
+    unlink($remlogo);
+  }
   echo "<script>window.location='./admin.php?id=uplogo&session=" . $session . "'</script>";
 } elseif ($id == "editor"  && !empty($session)) {
   include_once('./include/menu.php');

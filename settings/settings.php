@@ -23,7 +23,19 @@ if (!isset($_SESSION["mikhmon"])) {
   header("Location:../admin.php?id=login");
 } else {
 
+  // strip characters that could break out of the single-quoted strings in config.php
+  if (!function_exists('mikhmon_cfgsafe')) {
+    function mikhmon_cfgsafe($v) {
+      return str_replace(array("\\", "'", "\r", "\n"), "", (string)$v);
+    }
+  }
+
   if ($id == "settings" && explode("-",$router)[0] == "new") {
+    // router/session name must be a safe identifier (no quotes, no PHP break-out)
+    if (!preg_match('/^[A-Za-z0-9_-]+$/', $router)) {
+      echo "<script>alert('Invalid router name. Use only letters, numbers, - and _');window.location='./admin.php?id=sessions'</script>";
+      return;
+    }
     $data = '$data';
     $f = fopen('./include/config.php', 'a');
     fwrite($f, "\n'$'data['".$router."'] = array ('1'=>'".$router."!','".$router."@|@','".$router."#|#','".$router."%','".$router."^','".$router."&Rp','".$router."*10','".$router."(1','".$router.")','".$router."=10','".$router."@!@disable');");
@@ -39,26 +51,26 @@ if (!isset($_SESSION["mikhmon"])) {
 
   if (isset($_POST['save'])) {
 
-    $siphost = (preg_replace('/\s+/', '', $_POST['ipmik']));
-    $suserhost = ($_POST['usermik']);
+    $siphost = mikhmon_cfgsafe(preg_replace('/\s+/', '', $_POST['ipmik']));
+    $suserhost = mikhmon_cfgsafe($_POST['usermik']);
     $spasswdhost = encrypt($_POST['passmik']);
-    $shotspotname = str_replace("'","",$_POST['hotspotname']);
-    $sdnsname = ($_POST['dnsname']);
-    $scurrency = ($_POST['currency']);
-    $sreload = ($_POST['areload']);
+    $shotspotname = mikhmon_cfgsafe($_POST['hotspotname']);
+    $sdnsname = mikhmon_cfgsafe($_POST['dnsname']);
+    $scurrency = mikhmon_cfgsafe($_POST['currency']);
+    $sreload = mikhmon_cfgsafe($_POST['areload']);
     if ($sreload < 10) {
       $sreload = 10;
     } else {
       $sreload = $sreload;
     }
-    $siface = ($_POST['iface']);
+    $siface = mikhmon_cfgsafe($_POST['iface']);
     $sinfolp = implode(unpack("H*", $_POST['infolp']));
     //$sinfolp = encrypt($_POST['infolp']);
     //$sinfolp = ($_POST['infolp']);
-    $sidleto = ($_POST['idleto']);
+    $sidleto = mikhmon_cfgsafe($_POST['idleto']);
 
-    $sesname = (preg_replace('/\s+/', '-', $_POST['sessname']));
-    $slivereport = ($_POST['livereport']);
+    $sesname = preg_replace('/[^A-Za-z0-9_-]/', '', preg_replace('/\s+/', '-', $_POST['sessname']));
+    $slivereport = mikhmon_cfgsafe($_POST['livereport']);
 
     $search = array('1' => "$session!$iphost", "$session@|@$userhost", "$session#|#$passwdhost", "$session%$hotspotname", "$session^$dnsname", "$session&$currency", "$session*$areload", "$session($iface", "$session)$infolp", "$session=$idleto", "'$session'", "$session@!@$livereport");
 
