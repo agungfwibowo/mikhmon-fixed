@@ -1,8 +1,7 @@
-version: "3"
 services:
-  php_7_4:
-    image: php:7.4-fpm
-    container_name: php_7_4
+  php:
+    image: php:8.2-fpm
+    container_name: php
     tty: true
     working_dir: /var/www
     volumes: 
