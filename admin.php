@@ -70,19 +70,38 @@ include_once('./lib/formatbytesbites.php');
 <?php
 if ($id == "login" || substr($url, -1) == "p") {
 
-  if (isset($_POST['login'])) {
-    $user = $_POST['user'];
-    $pass = $_POST['pass'];
-    if ($user == $useradm && $pass == decrypt($passadm)) {
-      $_SESSION["mikhmon"] = $user;
+  // CSRF token for the login form
+  if (empty($_SESSION['csrf'])) {
+    $_SESSION['csrf'] = bin2hex(random_bytes(16));
+  }
+  $_alert = '<div style="width: 100%; padding:5px 0px 5px 0px; border-radius:5px;" class="bg-danger"><i class="fa fa-ban"></i> Alert!<br>';
 
-        echo "<script>window.location='./admin.php?id=sessions'</script>";
-    
+  if (isset($_POST['login'])) {
+    $now = time();
+    if (isset($_SESSION['lockout']) && $now < $_SESSION['lockout']) {
+      $error = $_alert . 'Too many attempts. Try again in ' . ($_SESSION['lockout'] - $now) . 's.</div>';
+    } elseif (!isset($_POST['csrf']) || empty($_SESSION['csrf']) || !hash_equals($_SESSION['csrf'], $_POST['csrf'])) {
+      $error = $_alert . 'Invalid session token. Please reload the page.</div>';
     } else {
-      $error = '<div style="width: 100%; padding:5px 0px 5px 0px; border-radius:5px;" class="bg-danger"><i class="fa fa-ban"></i> Alert!<br>Invalid username or password.</div>';
+      $user = $_POST['user'];
+      $pass = $_POST['pass'];
+      if ($user == $useradm && $pass == decrypt($passadm)) {
+        session_regenerate_id(true);
+        $_SESSION["mikhmon"] = $user;
+        $_SESSION['fail'] = 0;
+        $_SESSION['csrf'] = bin2hex(random_bytes(16));
+        echo "<script>window.location='./admin.php?id=sessions'</script>";
+      } else {
+        $_SESSION['fail'] = (isset($_SESSION['fail']) ? $_SESSION['fail'] : 0) + 1;
+        if ($_SESSION['fail'] >= 5) {
+          $_SESSION['lockout'] = $now + 300;
+          $_SESSION['fail'] = 0;
+        }
+        $error = $_alert . 'Invalid username or password.</div>';
+      }
     }
   }
-  
+
 
   include_once('./include/login.php');
 } elseif (!isset($_SESSION["mikhmon"])) {
