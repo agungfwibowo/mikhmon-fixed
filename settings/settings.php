@@ -49,7 +49,7 @@ if (!isset($_SESSION["mikhmon"])) {
     echo "<script>window.location='./admin.php?id=settings&session=" . $router . "'</script>";
   }
 
-  if (isset($_POST['save'])) {
+  if (isset($_POST['save']) && isset($_POST['csrf']) && !empty($_SESSION['csrf']) && hash_equals($_SESSION['csrf'], $_POST['csrf'])) {
 
     $siphost = mikhmon_cfgsafe(preg_replace('/\s+/', '', $_POST['ipmik']));
     $suserhost = mikhmon_cfgsafe($_POST['usermik']);
@@ -108,7 +108,8 @@ if (!isset($_SESSION["mikhmon"])) {
   
 </script>
 
-<form autocomplete="off" method="post" action="" name="settings">  
+<form autocomplete="off" method="post" action="" name="settings">
+<input type="hidden" name="csrf" value="<?= htmlspecialchars(isset($_SESSION['csrf']) ? $_SESSION['csrf'] : '', ENT_QUOTES) ?>">
 <div class="row">
 	<div class="col-12">
   		<div class="card" >

@@ -31,6 +31,12 @@ $c = $_GET['c'];
 $router = $_GET['router'];
 $logo = $_GET['logo'];
 
+// ensure a CSRF token exists for every request (forms + POST verification)
+if (empty($_SESSION['csrf'])) {
+  $_SESSION['csrf'] = bin2hex(random_bytes(16));
+}
+$csrf = $_SESSION['csrf'];
+
 $ids = array(
   "editor",
   "uplogo",

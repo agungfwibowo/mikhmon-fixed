@@ -25,7 +25,7 @@ if (!isset($_SESSION["mikhmon"])) {
 // array color
   $color = array('1' => 'bg-blue', 'bg-indigo', 'bg-purple', 'bg-pink', 'bg-red', 'bg-yellow', 'bg-green', 'bg-teal', 'bg-cyan', 'bg-grey', 'bg-light-blue');
 
-  if (isset($_POST['save'])) {
+  if (isset($_POST['save']) && isset($_POST['csrf']) && !empty($_SESSION['csrf']) && hash_equals($_SESSION['csrf'], $_POST['csrf'])) {
 
     $suseradm = ($_POST['useradm']);
     $spassadm = encrypt($_POST['passadm']);
@@ -118,6 +118,7 @@ if (!isset($_SESSION["mikhmon"])) {
         </div>
 			    <div class="col-6">
           <form autocomplete="off" method="post" action="">
+            <input type="hidden" name="csrf" value="<?= htmlspecialchars(isset($_SESSION['csrf']) ? $_SESSION['csrf'] : '', ENT_QUOTES) ?>">
             <div class="card">
               <div class="card-header">
                 <h3 class="card-title"><i class="fa fa-user-circle"></i> <?= $_admin ?></h3>
