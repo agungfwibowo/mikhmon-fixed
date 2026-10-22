@@ -17,7 +17,7 @@
  */
 session_start();
 // hide all error
-error_reporting(0);
+if (getenv('MIKHMON_DEBUG')) { error_reporting(E_ALL); ini_set('display_errors','1'); } else { error_reporting(0); }
 $getuser = $API->comm("/ip/hotspot/user/print", array(
   "?limit-uptime" => "1s",
 ));

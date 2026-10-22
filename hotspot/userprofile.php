@@ -17,7 +17,7 @@
  */
 
 // hide all error
-error_reporting(0);
+if (getenv('MIKHMON_DEBUG')) { error_reporting(E_ALL); ini_set('display_errors','1'); } else { error_reporting(0); }
 if (!isset($_SESSION["mikhmon"])) {
 	echo '
 <html>
